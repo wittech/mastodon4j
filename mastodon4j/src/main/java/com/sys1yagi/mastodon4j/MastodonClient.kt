@@ -6,6 +6,18 @@ import okhttp3.*
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+import java.security.KeyManagementException
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
+import java.security.SecureRandom
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
+import java.util.Arrays
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
+
 
 open class MastodonClient
 private constructor(
@@ -34,12 +46,56 @@ private constructor(
         }
 
         fun build(): MastodonClient {
-            return MastodonClient(
-                    instanceName,
-                    okHttpClientBuilder.addNetworkInterceptor(AuthorizationInterceptor(accessToken)).build(),
-                    gson
-            ).also {
-                it.debug = debug
+            try {
+                val context = SSLContext.getInstance("TLS")
+                context.init(null, arrayOf<X509TrustManager>(object : X509TrustManager {
+                    @Throws(CertificateException::class)
+                    override fun checkClientTrusted(
+                            chain: Array<X509Certificate>,
+                            authType: String
+                    ) {
+                    }
+
+                    @Throws(CertificateException::class)
+                    override fun checkServerTrusted(
+                            chain: Array<X509Certificate>,
+                            authType: String
+                    ) {
+                    }
+
+                    override fun getAcceptedIssuers(): Array<X509Certificate?> {
+                        return arrayOfNulls(0)
+                    }
+                }), SecureRandom())
+
+                val trustManagerFactory: TrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+                trustManagerFactory.init(null as KeyStore?)
+                val trustManagers = trustManagerFactory.trustManagers
+                if (trustManagers.size != 1 || trustManagers[0] !is X509TrustManager) {
+                    throw IllegalStateException("Unexpected default trust managers:" + Arrays.toString(trustManagers))
+                }
+                val trustManager = trustManagers[0] as X509TrustManager
+
+                return MastodonClient(
+                        instanceName,
+                        okHttpClientBuilder
+                                .sslSocketFactory(context.socketFactory, trustManager)
+                                .addNetworkInterceptor(AuthorizationInterceptor(accessToken))
+                                .build(),
+                        gson
+                ).also {
+                    it.debug = debug
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return MastodonClient(
+                        instanceName,
+                        okHttpClientBuilder
+                                .addNetworkInterceptor(AuthorizationInterceptor(accessToken))
+                                .build(),
+                        gson).also {
+                    it.debug = debug
+                }
             }
         }
     }
@@ -69,7 +125,7 @@ private constructor(
         }
     }
 
-    val baseUrl = "http://${instanceName}/api/v1"
+    val baseUrl = "https://${instanceName}/api/v1"
 
     open fun getSerializer() = gson
 
@@ -144,3 +200,4 @@ private constructor(
         }
     }
 }
+
