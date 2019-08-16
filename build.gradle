@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.51'
+    ext.kotlin_version = '1.3.21'
     ext.supportTestVersion = '0.5'
     ext.okhttpVersion = '3.6.0'
     ext.rxJavaVersion = '2.0.8'
@@ -18,17 +18,48 @@ apply plugin: 'kotlin'
 apply plugin: 'maven'
 
 group = "com.sys1yagi"
-version = '1.7.0'
+version = '1.8.0'
 
 allprojects {
     repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
+        mavenLocal()
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven {url 'http://maven.aliyun.com/nexus/content/repositories/google'}
+        maven {
+            credentials {
+                username "mvn_read_ws"
+                password "mrk8929"
+            }
+            url "http://mvn.cloud.alipay.com/nexus/content/repositories/releases/"
+        }
+        maven {
+            url "http://developer.huawei.com/repo/"
+        }
+        maven {
+            url "http://qt.qunar.com/package/mvn/repository/maven-qim/"
+        }
+        google()
     }
 }
 
 repositories {
-    mavenCentral()
+    mavenLocal()
+    maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+    maven {url 'http://maven.aliyun.com/nexus/content/repositories/google'}
+    maven {
+        credentials {
+            username "mvn_read_ws"
+            password "mrk8929"
+        }
+        url "http://mvn.cloud.alipay.com/nexus/content/repositories/releases/"
+    }
+    maven {
+        url "http://developer.huawei.com/repo/"
+    }
+    maven {
+        url "http://qt.qunar.com/package/mvn/repository/maven-qim/"
+    }
+    google()
 }
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

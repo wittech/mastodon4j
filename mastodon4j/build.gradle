@@ -37,12 +37,44 @@ dependencies {
 
 buildscript {
     repositories {
-        mavenCentral()
+        mavenLocal()
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven {url 'http://maven.aliyun.com/nexus/content/repositories/google'}
+        maven {
+            credentials {
+                username "mvn_read_ws"
+                password "mrk8929"
+            }
+            url "http://mvn.cloud.alipay.com/nexus/content/repositories/releases/"
+        }
+        maven {
+            url "http://developer.huawei.com/repo/"
+        }
+        maven {
+            url "http://qt.qunar.com/package/mvn/repository/maven-qim/"
+        }
+        google()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 repositories {
-    mavenCentral()
+    mavenLocal()
+    maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+    maven {url 'http://maven.aliyun.com/nexus/content/repositories/google'}
+    maven {
+        credentials {
+            username "mvn_read_ws"
+            password "mrk8929"
+        }
+        url "http://mvn.cloud.alipay.com/nexus/content/repositories/releases/"
+    }
+    maven {
+        url "http://developer.huawei.com/repo/"
+    }
+    maven {
+        url "http://qt.qunar.com/package/mvn/repository/maven-qim/"
+    }
+    google()
 }

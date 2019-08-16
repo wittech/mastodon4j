@@ -69,7 +69,7 @@ private constructor(
         }
     }
 
-    val baseUrl = "https://${instanceName}/api/v1"
+    val baseUrl = "http://${instanceName}/api/v1"
 
     open fun getSerializer() = gson
 
