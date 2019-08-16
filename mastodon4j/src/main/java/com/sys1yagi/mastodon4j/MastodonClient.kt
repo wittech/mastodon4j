@@ -14,9 +14,7 @@ import java.security.SecureRandom
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
 import java.util.Arrays
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
+import javax.net.ssl.*
 
 
 open class MastodonClient
@@ -43,6 +41,14 @@ private constructor(
 
         fun debug() = apply {
             this.debug = true
+        }
+
+        fun getHostnameVerifier() : HostnameVerifier {
+            return object: HostnameVerifier {
+                override fun verify(hostname: String?, session: SSLSession?): Boolean {
+                    return true
+                }
+            }
         }
 
         fun build(): MastodonClient {
@@ -79,6 +85,7 @@ private constructor(
                 return MastodonClient(
                         instanceName,
                         okHttpClientBuilder
+                                .hostnameVerifier(getHostnameVerifier())
                                 .sslSocketFactory(context.socketFactory, trustManager)
                                 .addNetworkInterceptor(AuthorizationInterceptor(accessToken))
                                 .build(),
@@ -91,6 +98,7 @@ private constructor(
                 return MastodonClient(
                         instanceName,
                         okHttpClientBuilder
+                                .hostnameVerifier(getHostnameVerifier())
                                 .addNetworkInterceptor(AuthorizationInterceptor(accessToken))
                                 .build(),
                         gson).also {
